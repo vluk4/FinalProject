@@ -11,7 +11,7 @@ object MainContract {
     sealed interface Effect : UiEffect
 
     data class State(
-        val conversationScreenState: ConversationsScreenContract.State = ConversationsScreenContract.State(),
+        val contactsScreenState: ContactsScreenContract.State = ContactsScreenContract.State(),
         val configurationScreenState: ConfigurationScreenContract.State = ConfigurationScreenContract.State(),
         val chatScreenState: ChatScreenContract.State = ChatScreenContract.State()
     ) : UiState

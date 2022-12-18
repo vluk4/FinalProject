@@ -1,7 +1,8 @@
 package domain.interactor
 
-import domain.model.UserConfiguration
+import domain.model.User
 import domain.repository.MainRepository
+import kotlinx.coroutines.flow.Flow
 
 class MainInteractorImpl(
     private val repository: MainRepository
@@ -11,22 +12,28 @@ class MainInteractorImpl(
         name: String,
         nickname: String,
         latitude: String,
-        longitude: String
+        longitude: String,
+        radius: String
     ): SaveUserDataResults {
         return runCatching {
-            val userData = UserConfiguration(
+            val userData = User(
                 isOnline = isOnline,
                 name = name,
                 nickname = nickname,
+                searchRadius = radius.toDouble(),
                 latitude = latitude.toDouble(),
                 longitude = longitude.toDouble()
             )
-            repository.saveUserDataOnJavaSpace(userData)
+            repository.updateUserData(userData)
 
             SaveUserDataResults.SuccessfullySavedData
         }.getOrElse {
             println(it.printStackTrace())
             SaveUserDataResults.FailedToSavedData
         }
+    }
+
+    override suspend fun getUserData(): Flow<List<User>?> {
+       return repository.listenToContacts()
     }
 }

@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import presentation.viewmodel.base.BaseViewModel
 import presentation.viewmodel.contracts.ChatScreenContract
 import presentation.viewmodel.contracts.ConfigurationScreenContract
-import presentation.viewmodel.contracts.ConversationsScreenContract
+import presentation.viewmodel.contracts.ContactsScreenContract
 
 class MainViewModel(
     private val coroutineScope: CoroutineScope,
@@ -20,7 +20,7 @@ class MainViewModel(
     override fun handleEvent(event: MainContract.Event) {
         coroutineScope.launch {
             when (event) {
-                is ConversationsScreenContract.Events -> {
+                is ContactsScreenContract.Events -> {
                     processConversationScreenEvents(event)
                 }
 
@@ -41,8 +41,20 @@ class MainViewModel(
 
     }
 
-    private fun processConversationScreenEvents(event: ConversationsScreenContract.Events) {
-
+    private suspend fun processConversationScreenEvents(event: ContactsScreenContract.Events) {
+        when (event) {
+            ContactsScreenContract.Events.RequestUserData -> {
+                interactor.getUserData().collect {
+                    setState {
+                        copy(
+                            contactsScreenState = currentState.contactsScreenState.copy(
+                                contacts = it
+                            )
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun processConfigurationScreenEvents(event: ConfigurationScreenContract.Events) {
@@ -90,22 +102,44 @@ class MainViewModel(
             ConfigurationScreenContract.Events.SaveUserData -> {
                 with(currentState.configurationScreenState) {
                     val result = interactor.saveUserDate(
-                        isOnline = false,
+                        isOnline = isOnline,
                         name = name,
+                        radius = radius,
                         nickname = nickname,
                         latitude = latitude,
                         longitude = longitude
                     )
 
-                    val effect = when(result) {
+                    val effect = when (result) {
                         is SaveUserDataResults.SuccessfullySavedData -> {
                             ConfigurationScreenContract.Effect.NavigateToContactsScreen
                         }
+
                         is SaveUserDataResults.FailedToSavedData -> {
                             ConfigurationScreenContract.Effect.ShowUnexpectedError
                         }
                     }
                     setEffect { effect }
+                }
+            }
+
+            is ConfigurationScreenContract.Events.OnSearchRadiusInputChanged -> {
+                setState {
+                    copy(
+                        configurationScreenState = currentState.configurationScreenState.copy(
+                            radius = event.radius
+                        )
+                    )
+                }
+            }
+
+            is ConfigurationScreenContract.Events.OnStatusChange -> {
+                setState {
+                    copy(
+                        configurationScreenState = configurationScreenState.copy(
+                            isOnline = event.isOnline
+                        )
+                    )
                 }
             }
         }

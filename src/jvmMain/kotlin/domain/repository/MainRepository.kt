@@ -1,7 +1,9 @@
 package domain.repository
 
-import domain.model.UserConfiguration
+import domain.model.User
+import kotlinx.coroutines.flow.Flow
 
 interface MainRepository {
-    suspend fun saveUserDataOnJavaSpace(userConfiguration: UserConfiguration)
+    suspend fun updateUserData(user: User)
+    suspend fun listenToContacts(): Flow<List<User>?>
 }

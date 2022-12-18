@@ -52,11 +52,11 @@ class TuplesSpace {
     }
 
     fun take(nome: String?): String? {
-        val msg: Message
+        val msg: Message?
         val template = Message()
         try {
             template.nome = nome
-            msg = space?.take(template, null, 500) as Message
+            msg = space?.take(template, null, 500) as? Message
         } catch (e: RemoteException) {
             e.printStackTrace()
             return null
@@ -70,7 +70,7 @@ class TuplesSpace {
             e.printStackTrace()
             return null
         }
-        return msg.mensagem
+        return msg?.mensagem
     }
 
     fun write(nome: String?, mensagem: String?) {

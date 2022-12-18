@@ -1,13 +1,12 @@
 package presentation.configuration
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -30,10 +29,11 @@ fun ConfigurationContent(
         coroutineScope.launch {
             viewModel.effect.collect {
                 if (it is ConfigurationScreenContract.Effect) {
-                    when(it) {
+                    when (it) {
                         ConfigurationScreenContract.Effect.NavigateToContactsScreen -> {
                             navigateToContactsScreen.invoke()
                         }
+
                         else -> Unit
                     }
                 }
@@ -48,6 +48,17 @@ fun ConfigurationContent(
     ) {
         Spacer(modifier = Modifier.height(32.dp))
         Text(text = R.string.FILL_YOUR_DATA, style = MaterialTheme.typography.h6)
+
+        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(R.string.ONLINE, style = MaterialTheme.typography.h5)
+            Spacer(modifier = Modifier.width(32.dp))
+            Switch(
+                checked = uiState.isOnline,
+                onCheckedChange = {
+                    viewModel.handleEvent(ConfigurationScreenContract.Events.OnStatusChange(it))
+                }
+            )
+        }
 
         TextField(
             value = uiState.name,
@@ -76,6 +87,20 @@ fun ConfigurationContent(
         )
 
         TextField(
+            value = uiState.radius,
+            onValueChange = {
+                viewModel.handleEvent(
+                    ConfigurationScreenContract.Events.OnSearchRadiusInputChanged(it)
+                )
+            },
+            label = {
+                Text(R.string.RADIUS_INPUT_LABEL)
+            },
+            maxLines = 1,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+        )
+
+        TextField(
             value = uiState.latitude,
             onValueChange = {
                 viewModel.handleEvent(
@@ -85,7 +110,8 @@ fun ConfigurationContent(
             label = {
                 Text(R.string.LATITUDE_INPUT_LABEL)
             },
-            maxLines = 1
+            maxLines = 1,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
         TextField(
@@ -98,7 +124,8 @@ fun ConfigurationContent(
             label = {
                 Text(R.string.LONGITUDE_INPUT_LABEL)
             },
-            maxLines = 1
+            maxLines = 1,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
         Button(onClick = {

@@ -38,16 +38,10 @@ kotlin {
                 implementation("com.arkivanov.decompose:decompose:1.0.0-beta-01")
                 implementation("com.arkivanov.decompose:extensions-compose-jetbrains:1.0.0-beta-01")
 
-                implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+                implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
+                implementation(fileTree(mapOf("dir" to "lib-dl", "include" to listOf("*.jar"))))
+                implementation(fileTree(mapOf("dir" to "lib-ext", "include" to listOf("*.jar"))))
 
-                /*//MOM
-                implementation("org.apache.activemq:activemq-core:5.6.0")
-
-                //Espaco Tuplas
-                implementation("org.apache.river:reggie:2.2.3")
-                implementation("net.jini:jini-core:2.1")
-                implementation("net.jini:jini-ext:2.1")
-                implementation("org.apache.river:outrigger:2.2.3")*/
 
                 //Gson
                 implementation("com.google.code.gson:gson:2.10")
