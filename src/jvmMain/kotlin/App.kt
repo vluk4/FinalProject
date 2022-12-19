@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
@@ -38,6 +40,7 @@ fun main() {
         val windowState = rememberWindowState(
             placement = WindowPlacement.Floating,
             position = WindowPosition(Alignment.Center),
+            size = DpSize(width = 500.dp, 700.dp)
         )
         Window(
             state = windowState,

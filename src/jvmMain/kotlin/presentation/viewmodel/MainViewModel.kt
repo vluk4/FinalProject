@@ -40,14 +40,15 @@ class MainViewModel(
     }
 
     private suspend fun processLoadingScreenEvents(event: LoadingScreenContract.Events) {
-        when(event) {
+        when (event) {
             is LoadingScreenContract.Events.InitializeApplication -> {
-                val effect = when(interactor.initializeApplication()) {
+                val effect = when (interactor.initializeApplication()) {
                     is InitializeFeatureResults.SuccessfullyInitialized -> {
-                            LoadingScreenContract.Effect.ProceedToConfigurationScreen
+                        LoadingScreenContract.Effect.ProceedToConfigurationScreen
                     }
+
                     is InitializeFeatureResults.FailedToInitialize -> {
-                            LoadingScreenContract.Effect.HandleError
+                        LoadingScreenContract.Effect.HandleError
                     }
                 }
                 setEffect { effect }
@@ -76,6 +77,7 @@ class MainViewModel(
     }
 
     private suspend fun processConfigurationScreenEvents(event: ConfigurationScreenContract.Events) {
+
         when (event) {
             is ConfigurationScreenContract.Events.OnNameInputChanged -> {
                 setState {
@@ -154,11 +156,20 @@ class MainViewModel(
             is ConfigurationScreenContract.Events.OnStatusChange -> {
                 setState {
                     copy(
-                        configurationScreenState = configurationScreenState.copy(
+                        configurationScreenState = currentState.configurationScreenState.copy(
                             isOnline = event.isOnline
                         )
                     )
                 }
+            }
+        }
+
+        with(currentState.configurationScreenState) {
+            val enableSaveButton = interactor.shouldEnableSaveButton(name, nickname, radius, latitude, longitude)
+            setState {
+                copy(configurationScreenState = configurationScreenState.copy(
+                    saveButtonEnabled = enableSaveButton
+                ))
             }
         }
     }

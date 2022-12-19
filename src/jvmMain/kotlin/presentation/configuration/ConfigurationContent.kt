@@ -1,8 +1,13 @@
 package presentation.configuration
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,16 +47,26 @@ fun ConfigurationContent(
         }
     }
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize().padding(horizontal = 64.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = R.string.FILL_YOUR_DATA, style = MaterialTheme.typography.h6)
+        Icon(
+            modifier = Modifier
+                .size(24.dp)
+                .clickable {
+                    navigateToContactsScreen.invoke()
+                },
+            imageVector = Icons.Filled.ArrowBack,
+            contentDescription = null
+        )
 
-        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(R.string.ONLINE, style = MaterialTheme.typography.h5)
-            Spacer(modifier = Modifier.width(32.dp))
             Switch(
                 checked = uiState.isOnline,
                 onCheckedChange = {
@@ -61,6 +76,7 @@ fun ConfigurationContent(
         }
 
         TextField(
+            modifier = Modifier.fillMaxWidth(),
             value = uiState.name,
             onValueChange = {
                 viewModel.handleEvent(
@@ -74,6 +90,7 @@ fun ConfigurationContent(
         )
 
         TextField(
+            modifier = Modifier.fillMaxWidth(),
             value = uiState.nickname,
             onValueChange = {
                 viewModel.handleEvent(
@@ -87,6 +104,7 @@ fun ConfigurationContent(
         )
 
         TextField(
+            modifier = Modifier.fillMaxWidth(),
             value = uiState.radius,
             onValueChange = {
                 viewModel.handleEvent(
@@ -101,6 +119,7 @@ fun ConfigurationContent(
         )
 
         TextField(
+            modifier = Modifier.fillMaxWidth(),
             value = uiState.latitude,
             onValueChange = {
                 viewModel.handleEvent(
@@ -115,6 +134,7 @@ fun ConfigurationContent(
         )
 
         TextField(
+            modifier = Modifier.fillMaxWidth(),
             value = uiState.longitude,
             onValueChange = {
                 viewModel.handleEvent(
@@ -128,9 +148,13 @@ fun ConfigurationContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
-        Button(onClick = {
-            viewModel.handleEvent(ConfigurationScreenContract.Events.SaveUserData)
-        }) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                viewModel.handleEvent(ConfigurationScreenContract.Events.SaveUserData)
+            },
+            enabled = uiState.saveButtonEnabled
+        ) {
             Text(R.string.SAVE_DATA, modifier = Modifier.padding(horizontal = 8.dp))
         }
     }

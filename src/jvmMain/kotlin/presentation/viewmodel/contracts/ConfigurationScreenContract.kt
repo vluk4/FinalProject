@@ -1,5 +1,6 @@
 package presentation.viewmodel.contracts
 
+import jdk.jfr.Enabled
 import presentation.viewmodel.base.UiState
 
 object ConfigurationScreenContract {
@@ -20,7 +21,8 @@ object ConfigurationScreenContract {
         val nickname: String = "",
         val radius: String = "",
         val latitude: String = "",
-        val longitude: String = ""
+        val longitude: String = "",
+        val saveButtonEnabled: Boolean = false
     ) : UiState
 
     sealed class Effect : MainContract.Effect {

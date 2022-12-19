@@ -34,7 +34,7 @@ class MainInteractorImpl(
     }
 
     override suspend fun getUserData(): Flow<List<User>?> {
-       return repository.listenToContacts()
+        return repository.listenToContacts()
     }
 
     override suspend fun initializeApplication(): InitializeFeatureResults {
@@ -44,5 +44,19 @@ class MainInteractorImpl(
         }.getOrElse {
             InitializeFeatureResults.FailedToInitialize
         }
+    }
+
+    override fun shouldEnableSaveButton(
+        name: String,
+        nickname: String,
+        radius: String,
+        latitude: String,
+        longitude: String
+    ): Boolean {
+        return name.isNotBlank() &&
+                nickname.isNotBlank() &&
+                radius.isNotBlank() &&
+                latitude.isNotBlank() &&
+                longitude.isNotBlank()
     }
 }

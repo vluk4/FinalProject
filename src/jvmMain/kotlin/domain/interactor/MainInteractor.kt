@@ -15,4 +15,5 @@ interface MainInteractor {
 
     suspend fun getUserData(): Flow<List<User>?>
     suspend fun initializeApplication(): InitializeFeatureResults
+    fun shouldEnableSaveButton(name: String, nickname: String, radius: String, latitude: String, longitude: String): Boolean
 }
