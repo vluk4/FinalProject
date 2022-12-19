@@ -1,14 +1,12 @@
 package presentation.viewmodel
 
+import domain.interactor.InitializeFeatureResults
 import domain.interactor.MainInteractor
 import domain.interactor.SaveUserDataResults
-import presentation.viewmodel.contracts.MainContract
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import presentation.viewmodel.base.BaseViewModel
-import presentation.viewmodel.contracts.ChatScreenContract
-import presentation.viewmodel.contracts.ConfigurationScreenContract
-import presentation.viewmodel.contracts.ContactsScreenContract
+import presentation.viewmodel.contracts.*
 
 class MainViewModel(
     private val coroutineScope: CoroutineScope,
@@ -20,6 +18,10 @@ class MainViewModel(
     override fun handleEvent(event: MainContract.Event) {
         coroutineScope.launch {
             when (event) {
+                is LoadingScreenContract.Events -> {
+                    processLoadingScreenEvents(event)
+                }
+
                 is ContactsScreenContract.Events -> {
                     processConversationScreenEvents(event)
                 }
@@ -33,6 +35,22 @@ class MainViewModel(
                 }
 
                 else -> Unit
+            }
+        }
+    }
+
+    private suspend fun processLoadingScreenEvents(event: LoadingScreenContract.Events) {
+        when(event) {
+            is LoadingScreenContract.Events.InitializeApplication -> {
+                val effect = when(interactor.initializeApplication()) {
+                    is InitializeFeatureResults.SuccessfullyInitialized -> {
+                            LoadingScreenContract.Effect.ProceedToConfigurationScreen
+                    }
+                    is InitializeFeatureResults.FailedToInitialize -> {
+                            LoadingScreenContract.Effect.HandleError
+                    }
+                }
+                setEffect { effect }
             }
         }
     }

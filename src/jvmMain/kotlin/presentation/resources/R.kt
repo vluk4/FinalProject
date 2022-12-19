@@ -11,5 +11,6 @@ object R {
         const val LONGITUDE_INPUT_LABEL = "Longitude"
         const val FILL_YOUR_DATA = "Preencha seus dados"
         const val SAVE_DATA = "Salvar"
+        const val LOADING_CONFIGURATION = "Iniciando configurações..."
     }
 }

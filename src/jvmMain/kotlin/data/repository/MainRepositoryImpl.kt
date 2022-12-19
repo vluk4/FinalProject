@@ -12,10 +12,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class MainRepositoryImpl(private val javaSpace: TuplesSpace) : MainRepository {
-
+    override suspend fun initializeJavaSpace() = withContext(Dispatchers.IO) {
+        javaSpace.init()
+    }
     override suspend fun updateUserData(user: User) =
         withContext(Dispatchers.IO) {
-            javaSpace.init()
             val gson = Gson()
             val type = object : TypeToken<List<User>>() {}.type
             val userListTuple = javaSpace.take(USER_LIST_IDENTIFIER)
@@ -33,6 +34,7 @@ class MainRepositoryImpl(private val javaSpace: TuplesSpace) : MainRepository {
                 javaSpace.write(USER_LIST_IDENTIFIER, gson.toJson(listOf(user)))
             }
         }
+
     override suspend fun listenToContacts(): Flow<List<User>?> = withContext(Dispatchers.IO) {
         var oldData = listOf<User>()
         flow {

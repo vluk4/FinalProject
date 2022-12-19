@@ -14,4 +14,5 @@ interface MainInteractor {
     ): SaveUserDataResults
 
     suspend fun getUserData(): Flow<List<User>?>
+    suspend fun initializeApplication(): InitializeFeatureResults
 }

@@ -36,4 +36,13 @@ class MainInteractorImpl(
     override suspend fun getUserData(): Flow<List<User>?> {
        return repository.listenToContacts()
     }
+
+    override suspend fun initializeApplication(): InitializeFeatureResults {
+        return runCatching {
+            repository.initializeJavaSpace()
+            InitializeFeatureResults.SuccessfullyInitialized
+        }.getOrElse {
+            InitializeFeatureResults.FailedToInitialize
+        }
+    }
 }
