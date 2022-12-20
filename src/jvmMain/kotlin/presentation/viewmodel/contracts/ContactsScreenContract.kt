@@ -7,6 +7,7 @@ import presentation.viewmodel.contracts.MainContract.Event
 object ContactsScreenContract {
 
     sealed class Events : Event {
+        data class OnChatSelected(val user: User) : Events()
         object RequestUserData: Events()
     }
 

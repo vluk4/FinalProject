@@ -10,11 +10,14 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceCurrent
+import presentation.chat.ChatContent
 import presentation.configuration.ConfigurationContent
 import presentation.contacts.ContactsContent
 import presentation.loading.LoadingContent
 import presentation.navigation.ChildStack
 import presentation.viewmodel.MainViewModel
+import presentation.viewmodel.contracts.ChatScreenContract
+import presentation.viewmodel.contracts.ContactsScreenContract
 
 @Composable
 fun MainContent(viewModel: MainViewModel) {
@@ -35,17 +38,24 @@ fun MainContent(viewModel: MainViewModel) {
             is Screen.ContactsList -> {
                 ContactsContent(
                     viewModel = viewModel,
-                    navigateToConfiguration = { navigation.replaceCurrent(Screen.Configuration) })
+                    navigateToConfiguration = { navigation.replaceCurrent(Screen.Configuration) },
+                    onContactSelected = {
+                        viewModel.handleEvent(ContactsScreenContract.Events.OnChatSelected(it))
+                        navigation.replaceCurrent(Screen.Chat)
+                    }
+                )
             }
 
-            Screen.Loading -> {
+            is Screen.Loading -> {
                 LoadingContent(
                     viewModel = viewModel,
                     onLoadingFinished = { navigation.replaceCurrent(Screen.Configuration) }
                 )
             }
 
-            Screen.Chat -> Unit
+            is Screen.Chat -> {
+                ChatContent(viewModel = viewModel)
+            }
         }
     }
 }

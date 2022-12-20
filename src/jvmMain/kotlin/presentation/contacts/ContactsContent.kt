@@ -1,6 +1,6 @@
 package presentation.contacts
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -12,7 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.model.User
@@ -20,7 +19,11 @@ import presentation.viewmodel.MainViewModel
 import presentation.viewmodel.contracts.ContactsScreenContract
 
 @Composable
-fun ContactsContent(viewModel: MainViewModel, navigateToConfiguration: () -> Unit) {
+fun ContactsContent(
+    viewModel: MainViewModel,
+    navigateToConfiguration: () -> Unit,
+    onContactSelected: (User) -> Unit
+) {
 
     val uiState by viewModel.uiState.collectAsState()
     val userData = uiState.contactsScreenState.contacts
@@ -35,19 +38,26 @@ fun ContactsContent(viewModel: MainViewModel, navigateToConfiguration: () -> Uni
                 modifier = Modifier.padding(start = 16.dp),
                 onClick = { navigateToConfiguration.invoke() })
             {
-                Icon(imageVector = Icons.Filled.Settings, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = null
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            ContactsList(modifier = Modifier.fillMaxWidth(), contacts = userData)
+            ContactsList(
+                modifier = Modifier.fillMaxWidth(),
+                contacts = userData,
+                onContactSelected = onContactSelected
+            )
         }
 
     }
 }
 
 @Composable
-private fun ContactsList(modifier: Modifier = Modifier, contacts: List<User>?) {
+private fun ContactsList(modifier: Modifier = Modifier, contacts: List<User>?, onContactSelected: (User) -> Unit) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -57,7 +67,9 @@ private fun ContactsList(modifier: Modifier = Modifier, contacts: List<User>?) {
         contacts?.forEach { contact ->
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp).clickable {
+                        onContactSelected.invoke(contact)
+                    },
                     elevation = 10.dp
                 ) {
                     Row(horizontalArrangement = Arrangement.SpaceBetween) {

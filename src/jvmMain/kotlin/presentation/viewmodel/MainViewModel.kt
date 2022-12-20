@@ -56,21 +56,73 @@ class MainViewModel(
         }
     }
 
-    private fun processChatScreenEvents(event: ChatScreenContract.Events) {
+    private suspend fun processChatScreenEvents(event: ChatScreenContract.Events) {
+        when (event) {
+            is ChatScreenContract.Events.OnMessageInputChanged -> {
+                setState {
+                    copy(
+                        chatScreenState = currentState.chatScreenState.copy(
+                            message = event.message
+                        )
+                    )
+                }
+            }
 
+            ChatScreenContract.Events.OnMessageSend -> {
+                val result = interactor.sendAndGetMessages(
+                    currentState.chatScreenState.message,
+                    currentState.currentUser,
+                    currentState.chatScreenState.receiver
+                )
+                setState {
+                    copy(
+                        chatScreenState = currentState.chatScreenState.copy(
+                            messages = result?.map { it }?.toMutableList().orEmpty(),
+                            message = ""
+                        )
+                    )
+                }
+            }
+
+            ChatScreenContract.Events.SubscribeToChat -> {
+                interactor.subscribeToChat(
+                    currentState.currentUser.name,
+                    currentState.chatScreenState.receiver.name
+                ).collect {
+                    setState {
+                        copy(
+                            chatScreenState = currentState.chatScreenState.copy(
+                                messages = it?.map { it }?.toMutableList().orEmpty()
+                            )
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun processConversationScreenEvents(event: ContactsScreenContract.Events) {
         when (event) {
             ContactsScreenContract.Events.RequestUserData -> {
-                interactor.getUserData().collect {
+                interactor.getUserData().collect { users ->
+                    val filteredList = users?.filter { it.name != currentState.currentUser.name }
                     setState {
                         copy(
                             contactsScreenState = currentState.contactsScreenState.copy(
-                                contacts = it
+                                contacts = filteredList
                             )
                         )
                     }
+                }
+            }
+
+            is ContactsScreenContract.Events.OnChatSelected -> {
+                setState {
+                    copy(
+                        chatScreenState = currentState.chatScreenState.copy(
+                            receiver = event.user
+                        )
+                    )
                 }
             }
         }
@@ -132,6 +184,9 @@ class MainViewModel(
 
                     val effect = when (result) {
                         is SaveUserDataResults.SuccessfullySavedData -> {
+                            setState {
+                                copy(currentUser = result.user)
+                            }
                             ConfigurationScreenContract.Effect.NavigateToContactsScreen
                         }
 
@@ -167,9 +222,11 @@ class MainViewModel(
         with(currentState.configurationScreenState) {
             val enableSaveButton = interactor.shouldEnableSaveButton(name, nickname, radius, latitude, longitude)
             setState {
-                copy(configurationScreenState = configurationScreenState.copy(
-                    saveButtonEnabled = enableSaveButton
-                ))
+                copy(
+                    configurationScreenState = configurationScreenState.copy(
+                        saveButtonEnabled = enableSaveButton
+                    )
+                )
             }
         }
     }

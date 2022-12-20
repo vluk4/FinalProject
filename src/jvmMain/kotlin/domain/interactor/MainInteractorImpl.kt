@@ -1,5 +1,6 @@
 package domain.interactor
 
+import domain.model.ChatMessage
 import domain.model.User
 import domain.repository.MainRepository
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +27,7 @@ class MainInteractorImpl(
             )
             repository.updateUserData(userData)
 
-            SaveUserDataResults.SuccessfullySavedData
+            SaveUserDataResults.SuccessfullySavedData(userData)
         }.getOrElse {
             println(it.printStackTrace())
             SaveUserDataResults.FailedToSavedData
@@ -58,5 +59,14 @@ class MainInteractorImpl(
                 radius.isNotBlank() &&
                 latitude.isNotBlank() &&
                 longitude.isNotBlank()
+    }
+
+    override suspend fun subscribeToChat(sender: String, receiver: String): Flow<List<ChatMessage>?> {
+        return repository.subscribeToChatTopic(sender, receiver)
+    }
+
+    override suspend fun sendAndGetMessages(message: String, sender: User, receiver: User): MutableList<ChatMessage>? {
+        val chatMessage = ChatMessage(sender = sender.name, message = message)
+        return repository.sendMessageToTopic(chatMessage, receiver)
     }
 }
