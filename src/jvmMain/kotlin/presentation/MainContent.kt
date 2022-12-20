@@ -54,7 +54,9 @@ fun MainContent(viewModel: MainViewModel) {
             }
 
             is Screen.Chat -> {
-                ChatContent(viewModel = viewModel)
+                ChatContent(viewModel = viewModel, onBackPressed = {
+                    navigation.replaceCurrent(Screen.ContactsList)
+                })
             }
         }
     }
