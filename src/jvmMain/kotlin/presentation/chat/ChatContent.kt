@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import domain.model.ChatMessage
 import kotlinx.coroutines.launch
 import presentation.viewmodel.MainViewModel
@@ -28,15 +30,20 @@ import presentation.viewmodel.contracts.ChatScreenContract
 fun ChatContent(viewModel: MainViewModel, onBackPressed: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val messages = uiState.chatScreenState.messages.toMutableStateList()
+    val messages = uiState.messages
     val input = uiState.chatScreenState.message
     val currentUser = uiState.currentUser
     val receiver = uiState.chatScreenState.receiver
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(key1 = Unit) {
-        viewModel.handleEvent(ChatScreenContract.Events.SubscribeToChat)
-    }
+    val type = object : TypeToken<MutableMap<String, MutableList<ChatMessage>>>() {}.type
+    val messagesObject = Gson().fromJson<MutableMap<String, MutableList<ChatMessage>>>(messages, type) ?: emptyMap()
+
+    val myMessages = messagesObject.getOrDefault("${currentUser.name}${receiver.name}", mutableListOf())
+    val receiverMessages = messagesObject.getOrDefault("${receiver.name}${currentUser.name}", mutableListOf())
+
+    val chatMessages = (myMessages + receiverMessages).sortedBy { it.date }
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         Column(
@@ -51,11 +58,11 @@ fun ChatContent(viewModel: MainViewModel, onBackPressed: () -> Unit) {
                     .verticalScroll(scrollState).padding(vertical = 48.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                messages.forEach { message ->
+                chatMessages.forEach { message ->
                     if (message.sender == currentUser.name) {
                         MessageCard(
                             modifier = Modifier.align(Alignment.End).padding(start = 48.dp),
-                            color = Color.Green,
+                            color = Color.DarkGray,
                             message = message
                         )
                     } else {

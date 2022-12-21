@@ -8,7 +8,6 @@ object ChatScreenContract {
 
     sealed class Events : MainContract.Event {
         object OnMessageSend: Events()
-        object SubscribeToChat : Events()
         object CleanState : Events()
         data class OnMessageInputChanged(val message: String): Events()
     }
@@ -19,7 +18,5 @@ object ChatScreenContract {
         val receiver: User = User()
     ) : UiState
 
-    sealed class Effect : MainContract.Effect {
-
-    }
+    sealed class Effect : MainContract.Effect
 }

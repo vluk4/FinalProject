@@ -1,5 +1,6 @@
 package presentation.viewmodel
 
+import com.google.gson.Gson
 import domain.interactor.InitializeFeatureResults
 import domain.interactor.MainInteractor
 import domain.interactor.SaveUserDataResults
@@ -18,6 +19,17 @@ class MainViewModel(
     override fun handleEvent(event: MainContract.Event) {
         coroutineScope.launch {
             when (event) {
+                is MainContract.Event.SubscribeToMessagesTopic -> {
+                    interactor.subscribeToGeneralTopic().collect { messages ->
+                        val messageString = Gson().toJson(messages)
+                        setState {
+                            copy(
+                                messages = messageString
+                            )
+                        }
+                    }
+                }
+
                 is LoadingScreenContract.Events -> {
                     processLoadingScreenEvents(event)
                 }
@@ -68,34 +80,18 @@ class MainViewModel(
                 }
             }
 
-            ChatScreenContract.Events.OnMessageSend -> {
-                val result = interactor.sendAndGetMessages(
+            is ChatScreenContract.Events.OnMessageSend -> {
+                interactor.sendMessageToGeneralTopic(
                     currentState.chatScreenState.message,
-                    currentState.currentUser,
-                    currentState.chatScreenState.receiver
+                    currentState.currentUser.name,
+                    currentState.chatScreenState.receiver.name
                 )
                 setState {
                     copy(
                         chatScreenState = currentState.chatScreenState.copy(
-                            messages = result?.map { it }?.toMutableList().orEmpty(),
                             message = ""
                         )
                     )
-                }
-            }
-
-            ChatScreenContract.Events.SubscribeToChat -> {
-                interactor.subscribeToChat(
-                    currentState.currentUser.name,
-                    currentState.chatScreenState.receiver.name
-                ).collect {
-                    setState {
-                        copy(
-                            chatScreenState = currentState.chatScreenState.copy(
-                                messages = it?.map { it }?.toMutableList().orEmpty()
-                            )
-                        )
-                    }
                 }
             }
 

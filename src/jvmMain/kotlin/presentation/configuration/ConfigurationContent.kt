@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import presentation.resources.R
 import presentation.viewmodel.MainViewModel
 import presentation.viewmodel.contracts.ConfigurationScreenContract
+import presentation.viewmodel.contracts.MainContract
 
 @Composable
 fun ConfigurationContent(
@@ -151,6 +152,7 @@ fun ConfigurationContent(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
+                viewModel.handleEvent(MainContract.Event.SubscribeToMessagesTopic)
                 viewModel.handleEvent(ConfigurationScreenContract.Events.SaveUserData)
             },
             enabled = uiState.saveButtonEnabled

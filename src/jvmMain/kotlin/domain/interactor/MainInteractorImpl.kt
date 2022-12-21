@@ -61,12 +61,17 @@ class MainInteractorImpl(
                 longitude.isNotBlank()
     }
 
-    override suspend fun subscribeToChat(sender: String, receiver: String): Flow<List<ChatMessage>?> {
-        return repository.subscribeToChatTopic(sender, receiver)
+    override suspend fun sendMessageToGeneralTopic(message: String, sender: String, receiver: String) {
+        repository.sendMessageToGeneralTopic(
+            message = ChatMessage(
+                sender = sender,
+                receiver = receiver,
+                message = message
+            )
+        )
     }
 
-    override suspend fun sendAndGetMessages(message: String, sender: User, receiver: User): MutableList<ChatMessage>? {
-        val chatMessage = ChatMessage(sender = sender.name, message = message)
-        return repository.sendMessageToTopic(chatMessage, receiver)
+    override suspend fun subscribeToGeneralTopic(): Flow<MutableMap<String, MutableList<ChatMessage>>> {
+        return repository.subscribeToGeneralTopic()
     }
 }

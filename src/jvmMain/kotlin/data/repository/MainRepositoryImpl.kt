@@ -27,39 +27,27 @@ class MainRepositoryImpl(private val javaSpace: TuplesSpace, private val subscri
         subscriber.initSubscriber()
     }
 
-    override suspend fun subscribeToChatTopic(sender: String, receiver: String): Flow<List<ChatMessage>?> =
+    override suspend fun subscribeToGeneralTopic(): Flow<MutableMap<String, MutableList<ChatMessage>>> =
         withContext(Dispatchers.IO) {
-            with(subscriber) {
-                var oldMessage: ChatMessage? = null
-                callbackFlow {
-                    // Recuperando menssagens salvas
-                    clientMessages[receiver]?.let { trySend(it) }
-
-                    subscribeToTopic(topic = "$receiver$sender") { receivedMessage ->
-                        val newMessage = receivedMessage.toChatMessage()
-
-                        if (newMessage != oldMessage) {
-                            oldMessage = newMessage
-
-                            newMessage?.let {
-                                clientMessages.getOrPut(receiver) { mutableListOf() }.add(it)
-                                trySendBlocking(clientMessages[receiver])
-                            }
-                        }
+            callbackFlow {
+                subscriber.subscribeToTopic(GENERAL_MESSAGE_TOPIC) { receivedMessage ->
+                    val newMessage = receivedMessage.toChatMessage()
+                    if (newMessage != null) {
+                        clientMessages.getOrPut("${newMessage.sender}${newMessage.receiver}") { mutableListOf() }
+                            .add(newMessage)
+                        trySendBlocking(clientMessages)
                     }
-                    awaitClose()
                 }
+                awaitClose()
             }
         }
 
-    override suspend fun sendMessageToTopic(message: ChatMessage, receiver: User): MutableList<ChatMessage>? =
+    override suspend fun sendMessageToGeneralTopic(message: ChatMessage) {
         withContext(Dispatchers.IO) {
             val messageJson = Gson().toJson(message)
-            Publisher("${message.sender}${receiver.name}", messageJson)
-            clientMessages.getOrPut(receiver.name) { mutableListOf() }.add(message)
-
-            return@withContext clientMessages[receiver.name]
+            Publisher(GENERAL_MESSAGE_TOPIC, messageJson)
         }
+    }
 
     override suspend fun updateUserData(user: User) =
         withContext(Dispatchers.IO) {
@@ -103,5 +91,6 @@ class MainRepositoryImpl(private val javaSpace: TuplesSpace, private val subscri
 
     companion object {
         private const val USER_LIST_IDENTIFIER = "user_list"
+        private const val GENERAL_MESSAGE_TOPIC = "general_topic"
     }
 }
