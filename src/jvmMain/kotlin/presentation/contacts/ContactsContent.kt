@@ -27,6 +27,7 @@ fun ContactsContent(
 
     val uiState by viewModel.uiState.collectAsState()
     val userData = uiState.contactsScreenState.contacts
+    val currentUser = uiState.currentUser
 
     LaunchedEffect(key1 = Unit) {
         viewModel.handleEvent(ContactsScreenContract.Events.RequestUserData)
@@ -47,6 +48,7 @@ fun ContactsContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             ContactsList(
+                currentUser = currentUser,
                 modifier = Modifier.fillMaxWidth(),
                 contacts = userData,
                 onContactSelected = onContactSelected
@@ -57,7 +59,12 @@ fun ContactsContent(
 }
 
 @Composable
-private fun ContactsList(modifier: Modifier = Modifier, contacts: List<User>?, onContactSelected: (User) -> Unit) {
+private fun ContactsList(
+    currentUser: User,
+    modifier: Modifier = Modifier,
+    contacts: List<User>?,
+    onContactSelected: (User) -> Unit
+) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -86,14 +93,22 @@ private fun ContactsList(modifier: Modifier = Modifier, contacts: List<User>?, o
                             )
                         }
 
-                        if (contact.isOnline) {
-                            Text(
-                                text = "Online",
-                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-                                color = Color.Green
-                            )
-                        } else {
-                            Text(text = "Offline", modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
+                        Column(horizontalAlignment = Alignment.End) {
+                            if (contact.isOnline) {
+                                Text(
+                                    text = "Online",
+                                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                                    color = Color.Green
+                                )
+                            } else {
+                                Text(text = "Offline", modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
+                            }
+
+                            if (contact.isOnCommunicableRadius(currentUser.latitude, currentUser.longitude)) {
+                                Text("No raio", modifier = Modifier.padding(horizontal = 16.dp))
+                            } else {
+                                Text("Fora do raio", modifier = Modifier.padding(horizontal = 16.dp))
+                            }
                         }
                     }
                 }
