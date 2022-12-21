@@ -1,5 +1,6 @@
 package presentation.chat
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import domain.model.ChatMessage
 import kotlinx.coroutines.launch
 import presentation.viewmodel.MainViewModel
 import presentation.viewmodel.contracts.ChatScreenContract
@@ -46,7 +48,7 @@ fun ChatContent(viewModel: MainViewModel, onBackPressed: () -> Unit) {
             Column(
                 modifier = Modifier.fillMaxSize()
                     .padding(horizontal = 8.dp)
-                    .verticalScroll(scrollState).padding(vertical = 64.dp),
+                    .verticalScroll(scrollState).padding(vertical = 48.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 messages.forEach { message ->
@@ -54,13 +56,13 @@ fun ChatContent(viewModel: MainViewModel, onBackPressed: () -> Unit) {
                         MessageCard(
                             modifier = Modifier.align(Alignment.End).padding(start = 48.dp),
                             color = Color.Green,
-                            message = message.message
+                            message = message
                         )
                     } else {
                         MessageCard(
                             modifier = Modifier.align(Alignment.Start).padding(end = 48.dp),
                             color = Color.Blue,
-                            message = message.message
+                            message = message
                         )
                     }
                 }
@@ -100,23 +102,63 @@ private fun ChatToolbar(title: String, onBackPressed: () -> Unit) {
         modifier = Modifier.fillMaxWidth().background(color = Color.LightGray),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = {
-            onBackPressed.invoke()
-        }) {
-            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+        IconButton(onClick = { onBackPressed.invoke() }) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = null
+            )
         }
-        Text(modifier = Modifier.padding(start = 16.dp), text = title, style = MaterialTheme.typography.h5)
+        Text(
+            modifier = Modifier.padding(start = 16.dp),
+            text = title,
+            style = MaterialTheme.typography.h5
+        )
     }
 }
 
 @Composable
-private fun MessageCard(modifier: Modifier = Modifier, color: Color, message: String) {
+private fun MessageCard(modifier: Modifier = Modifier, color: Color, message: ChatMessage) {
     Card(modifier = modifier, backgroundColor = color, shape = RoundedCornerShape(CornerSize(percent = 25))) {
-        Text(
-            modifier = Modifier.padding(8.dp),
-            text = message,
-            color = Color.White,
-            style = MaterialTheme.typography.body1
-        )
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = message.message,
+                color = Color.White,
+                style = MaterialTheme.typography.body1
+            )
+
+            Text(
+                modifier = modifier.padding(8.dp),
+                text = message.hours,
+                color = Color.LightGray,
+                style = MaterialTheme.typography.body2
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ChatMessagePreview() {
+    MaterialTheme {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.background(color = MaterialTheme.colors.background)
+        ) {
+            MessageCard(
+                color = Color.Green,
+                message = ChatMessage(
+                    sender = "Victor",
+                    message = "Ola tudo bem?"
+                )
+            )
+            MessageCard(
+                color = Color.Blue,
+                message = ChatMessage(
+                    sender = "Victor",
+                    message = "Tudo sim e com voce?"
+                )
+            )
+        }
     }
 }
