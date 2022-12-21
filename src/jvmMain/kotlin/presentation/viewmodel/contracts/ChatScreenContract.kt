@@ -9,6 +9,7 @@ object ChatScreenContract {
     sealed class Events : MainContract.Event {
         object OnMessageSend: Events()
         object SubscribeToChat : Events()
+        object CleanState : Events()
         data class OnMessageInputChanged(val message: String): Events()
     }
 

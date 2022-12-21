@@ -40,7 +40,7 @@ class MainInteractorImpl(
 
     override suspend fun initializeApplication(): InitializeFeatureResults {
         return runCatching {
-            repository.initializeJavaSpace()
+            repository.initializeServices()
             InitializeFeatureResults.SuccessfullyInitialized
         }.getOrElse {
             InitializeFeatureResults.FailedToInitialize

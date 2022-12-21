@@ -98,6 +98,12 @@ class MainViewModel(
                     }
                 }
             }
+
+            is ChatScreenContract.Events.CleanState -> {
+                setState {
+                    copy(chatScreenState = ChatScreenContract.State())
+                }
+            }
         }
     }
 

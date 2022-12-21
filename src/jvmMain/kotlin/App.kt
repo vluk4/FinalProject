@@ -14,6 +14,7 @@ import androidx.compose.ui.window.*
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import data.repository.MainRepositoryImpl
+import data.services.mom.Subscriber
 import data.services.tuples.TuplesSpace
 import domain.interactor.MainInteractor
 import domain.interactor.MainInteractorImpl
@@ -28,7 +29,8 @@ fun main() {
     val rootComponentContext = DefaultComponentContext(lifecycle = lifecycle)
 
     val javaSpace = TuplesSpace()
-    val repository: MainRepository = MainRepositoryImpl(javaSpace)
+    val subscriber = Subscriber()
+    val repository: MainRepository = MainRepositoryImpl(javaSpace, subscriber)
     val interactor: MainInteractor =  MainInteractorImpl(repository)
 
     application {

@@ -11,38 +11,43 @@ import domain.model.ChatMessage
 import domain.model.User
 import domain.repository.MainRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
-class MainRepositoryImpl(private val javaSpace: TuplesSpace) : MainRepository {
+class MainRepositoryImpl(private val javaSpace: TuplesSpace, private val subscriber: Subscriber) : MainRepository {
 
-    private lateinit var subscriber: Subscriber
     private val clientMessages: MutableMap<String, MutableList<ChatMessage>> = mutableMapOf()
-    override suspend fun initializeJavaSpace() = withContext(Dispatchers.IO) {
+    override suspend fun initializeServices() = withContext(Dispatchers.IO) {
         javaSpace.init()
+        subscriber.initSubscriber()
     }
 
     override suspend fun subscribeToChatTopic(sender: String, receiver: String): Flow<List<ChatMessage>?> =
         withContext(Dispatchers.IO) {
-            subscriber = Subscriber(receiver)
-            var oldMessage: ChatMessage? = null
-            flow {
-                while (true) {
-                    delay(1000)
-                    val receivedMessage = subscriber.mensagemRecebida.toChatMessage()
+            with(subscriber) {
+                var oldMessage: ChatMessage? = null
+                callbackFlow {
+                    // Recuperando menssagens salvas
+                    clientMessages[receiver]?.let { trySend(it) }
 
-                    if (receivedMessage != oldMessage) {
-                        receivedMessage?.let {
-                            clientMessages.getOrPut(receiver) {
-                                mutableListOf(receivedMessage)
-                            }.add(it)
+                    subscribeToTopic(topic = "$receiver$sender") { receivedMessage ->
+                        val newMessage = receivedMessage.toChatMessage()
 
-                            emit(clientMessages[receiver])
-                            oldMessage = receivedMessage
+                        if (newMessage != oldMessage) {
+                            oldMessage = newMessage
+
+                            newMessage?.let {
+                                clientMessages.getOrPut(receiver) { mutableListOf() }.add(it)
+                                trySendBlocking(clientMessages[receiver])
+                            }
                         }
                     }
+                    awaitClose()
                 }
             }
         }
@@ -50,8 +55,8 @@ class MainRepositoryImpl(private val javaSpace: TuplesSpace) : MainRepository {
     override suspend fun sendMessageToTopic(message: ChatMessage, receiver: User): MutableList<ChatMessage>? =
         withContext(Dispatchers.IO) {
             val messageJson = Gson().toJson(message)
-            Publisher(message.sender, messageJson)
-            clientMessages.getOrPut(receiver.name) { mutableListOf(message) }.add(message)
+            Publisher("${message.sender}${receiver.name}", messageJson)
+            clientMessages.getOrPut(receiver.name) { mutableListOf() }.add(message)
 
             return@withContext clientMessages[receiver.name]
         }

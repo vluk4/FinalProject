@@ -55,6 +55,7 @@ fun MainContent(viewModel: MainViewModel) {
 
             is Screen.Chat -> {
                 ChatContent(viewModel = viewModel, onBackPressed = {
+                    viewModel.handleEvent(ChatScreenContract.Events.CleanState)
                     navigation.replaceCurrent(Screen.ContactsList)
                 })
             }

@@ -30,8 +30,6 @@ fun ChatContent(viewModel: MainViewModel, onBackPressed: () -> Unit) {
     val input = uiState.chatScreenState.message
     val currentUser = uiState.currentUser
     val receiver = uiState.chatScreenState.receiver
-
-    val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
     LaunchedEffect(key1 = Unit) {
